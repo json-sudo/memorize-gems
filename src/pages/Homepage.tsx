@@ -9,7 +9,7 @@ export default function HomePage({ onPickMode }: Props) {
   return (
     <main className="container">
       <header>
-        <h1>Flashcards</h1>
+        <h1 className='text-4xl'>Memorize Gems</h1>
         <p>Memorize your favorite scriptures in three modes. Pick one to start.</p>
       </header>
 

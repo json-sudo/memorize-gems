@@ -11,7 +11,7 @@ type Props = {
 
 export default function PracticePage({ mode, onBack }: Props) {
   const {
-    index, prompt, reveal, next, prev, onReveal
+    index, card, prompt, reveal, next, prev, onReveal
   } = useFlashcards(DATASET, mode);
 
   const total = useMemo(() => DATASET.length, []);
@@ -33,6 +33,7 @@ export default function PracticePage({ mode, onBack }: Props) {
         onPrev={prev}
         index={index}
         total={total}
+        card={card}
       />
     </main>
   );

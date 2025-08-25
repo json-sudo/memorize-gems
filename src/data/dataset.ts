@@ -16,5 +16,9 @@ export const DATASET: Card[] = [
   {
     scripture: 'Isaiah 41:10',
     verseContent: 'Do not be afraid, for I am with you. Do not be anxious, for I am your God. I will fortify you, yes, I will help you, I will really hold on to you with my right hand of righteousness.',
+  },
+  {
+    scripture: 'Philippians 4:6,7',
+    verseContent: '6. Do not be anxious over anything, but in everything by prayer and supplication along with thanksgiving let your petitions be made known to God; 7. and the peace of God that surpasses all understanding will guard your hearts and your mental powers by means of Christ Jesus.',
   }
 ];

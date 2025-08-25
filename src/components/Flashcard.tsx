@@ -9,6 +9,7 @@ type Props = {
   onPrev: () => void;
   index: number;
   total: number;
+  card: Card;
 };
 
 export default function Flashcard({
@@ -19,12 +20,13 @@ export default function Flashcard({
   onNext,
   onPrev,
   index,
-  total
+  total,
+  card
 }: Props) {
   return (
-    <section className="flashcard" aria-label="Flashcard">
+    <section className="flashcard flex flex-column gap-x-8 mt-12" aria-label="Flashcard">
       <div className="card-body">
-        <dl>
+        <dl style={{ gap: '36px 124px' }}>
           {'scripture' in shown && (
             <>
               <dt>Scripture</dt>
@@ -33,23 +35,54 @@ export default function Flashcard({
           )}
           {'verseContent' in shown && (
             <>
-              <dt>What the Scripture says</dt>
+              <dt className='whitespace-nowrap'>What the Scripture says</dt>
               <dd>{shown.verseContent}</dd>
             </>
           )}
           {/* Hidden piece */}
-          <dt>{hiddenKey === 'verseContent' ? 'Other detail' : hiddenKey[0].toUpperCase() + hiddenKey.slice(1)}</dt>
+          <dt className="text-slate-400">
+            {hiddenKey === 'verseContent'
+              ? 'Verse'
+              : hiddenKey === 'scripture'
+              ? 'Scripture'
+              : hiddenKey}
+          </dt>
           <dd className={!reveal ? 'masked' : ''}>
-            {reveal ? '<revealed>' : '••••• tap Reveal'}
+            <span
+              className={[
+                'absolute inset-0',
+                'text-slate-400 select-none',
+                'transition-all duration-300 ease-out',
+                reveal ? 'opacity-0 -translate-y-1 pointer-events-none' : 'opacity-100 translate-y-0'
+              ].join(' ')}
+            >
+              ••••• tap Reveal
+            </span>
+            <span
+              className={[
+                'block',
+                'transition-all duration-300 ease-out will-change-[filter,opacity,transform]',
+                reveal ? 'opacity-100 blur-0 translate-y-0' : 'opacity-0 blur-sm translate-y-1'
+              ].join(' ')}
+            >
+              {reveal ? card[hiddenKey] : '••••• tap Reveal'}
+            </span>
           </dd>
         </dl>
 
-        <div className="controls">
-          <button onClick={onPrev} aria-label="Previous card">‹ Prev</button>
+        <div className="controls justify-between">
+          <button
+            onClick={onPrev} aria-label="Previous card" className='control-buttons'>‹ Prev</button>
           {!reveal && (
-            <button onClick={onReveal} aria-label="Reveal answer">Reveal</button>
+            <button
+              onClick={onReveal}
+              aria-label="Reveal answer"
+              className='control-buttons reveal'
+              >
+                Reveal
+              </button>
           )}
-          <button onClick={onNext} aria-label="Next card">Next ›</button>
+          <button className='control-buttons' onClick={onNext} aria-label="Next card">Next ›</button>
         </div>
 
         <div className="meta">
