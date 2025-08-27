@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import HomePage from './pages/HomePage';
-import PracticePage from './pages/MemorizeGemsPage';
+import HomePage from './pages/Homepage';
+import MemorizeGemsPage from './pages/MemorizeGemsPage';
 import { MemorizeMode } from './types/cards';
 import './index.css';
 
@@ -11,5 +11,5 @@ export default function App() {
     return <HomePage onPickMode={setMode} />;
   }
 
-  return <PracticePage mode={mode} onBack={() => setMode(null)} />;
+  return <MemorizeGemsPage mode={mode} onBack={() => setMode(null)} />;
 }

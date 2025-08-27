@@ -9,7 +9,7 @@ type Props = {
   onBack: () => void;
 };
 
-export default function PracticePage({ mode, onBack }: Props) {
+export default function MemorizeGemsPage({ mode, onBack }: Props) {
   const {
     index, card, prompt, reveal, next, prev, onReveal
   } = useFlashcards(DATASET, mode);
