@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { DATASET } from '../data/dataset';
 import { MemorizeMode } from '../types/cards';
 import Flashcard from '../components/Flashcard';

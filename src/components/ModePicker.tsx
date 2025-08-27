@@ -1,4 +1,3 @@
-import React from 'react';
 import { MemorizeMode } from '../types/cards';
 import { PREVIEW_MAP } from '../data/preview';
 import ModeCardPreview from './ModeCardPreview';
