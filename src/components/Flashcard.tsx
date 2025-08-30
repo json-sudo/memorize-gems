@@ -78,9 +78,9 @@ export default function Flashcard({
               onClick={onReveal}
               aria-label="Reveal answer"
               className='control-buttons reveal'
-              >
+            >
                 Reveal
-              </button>
+            </button>
           )}
           <button className='control-buttons' onClick={onNext} aria-label="Next card">Next ›</button>
         </div>
