@@ -4,7 +4,7 @@ import { MemorizeMode } from '../types/cards';
 
 type Prompt = {
   shown: Partial<Card>;
-  hiddenKey: keyof Card; // what the user should guess
+  hiddenKey: keyof Card;
 };
 
 function buildPrompt(card: Card, mode: MemorizeMode): Prompt {
@@ -21,13 +21,11 @@ function buildPrompt(card: Card, mode: MemorizeMode): Prompt {
       };
     }
     case MemorizeMode.GuessEither: {
-      const keys: (keyof Card)[] = ['scripture', 'verseContent'];
-      const hiddenKey = keys[Math.floor(Math.random() * keys.length)];
+      const hide = Math.random() < 0.5 ? 'scripture' : 'verseContent' as const;
       const shown: Partial<Card> = {};
-      keys.forEach(k => {
-        if (k !== hiddenKey) shown[k] = card[k];
-      });
-      return { shown, hiddenKey };
+      if (hide === 'scripture') shown.verseContent = card.verseContent;
+      else shown.scripture = card.scripture;
+      return { shown, hiddenKey: hide };
     }
     default:
       return {
