@@ -1,4 +1,3 @@
-// src/components/Reauth.tsx
 import { useState } from 'react';
 import { signInWithGoogle, signInEmail, signUpEmail, getUser } from '../services/auth';
 import { mergeAnonFavoritesIntoAccount } from '../services/anon'

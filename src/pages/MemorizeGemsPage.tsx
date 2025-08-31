@@ -3,12 +3,12 @@ import { DATASET } from '../data/dataset';
 import { MemorizeMode, type Card } from '../types/cards';
 import Flashcard from '../components/Flashcard';
 import { useFlashcards } from '../hooks/useFlashcards';
-import { fetchScripturesPage, fetchFavoritesDue } from '../services/db';
+import { fetchScripturesPage, fetchDefaultGems, fetchFavoritesDue } from '../services/db';
 
 type Props = {
   mode: MemorizeMode;
   onBack: () => void;
-  source: 'all' | 'favoritesDue';
+  source: 'all' | 'favoritesDue' | 'default';
 };
 
 export default function MemorizeGemsPage({ mode, onBack, source }: Props) {
@@ -16,13 +16,14 @@ export default function MemorizeGemsPage({ mode, onBack, source }: Props) {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
+
   useEffect(() => {
     let cancelled = false;
     async function run() {
       setLoading(true); setErr(null);
       try {
         const cards = source === 'all'
-          ? await fetchScripturesPage({ limit: 200, offset: 0 })     // adjust pagination later
+          ? await fetchDefaultGems(10)     // adjust pagination later
           : await fetchFavoritesDue(60);                         // 60-day blackout default
         if (!cancelled) setDataset(cards);
       } catch (e: unknown) {
@@ -69,7 +70,7 @@ export default function MemorizeGemsPage({ mode, onBack, source }: Props) {
     );
   }
 
-  if (!total) {
+  if (!loading && total === 0) {
     return (
       <main className="container">
         <header className="row between">
