@@ -86,10 +86,24 @@ export async function listFavoritesPage(page: number, pageSize: number) {
   const from = page * pageSize;
   const to = from + pageSize - 1;
   const query = supabase
-    .from('favorite+gems')
-    .select('scripture_id, created_at, scripture:scripture_id (id, book, chapter, verse_from, verse_to, verse_content', { count: 'exact' })
-    .order('created_at', { ascending: false })
-    .range(from, to);
+    .from('favorite_gems')
+      .select(
+        `
+        scripture_id,
+        created_at,
+        scripture:scripture_id (
+          id,
+          book,
+          chapter,
+          verse_from,
+          verse_to,
+          verse_content
+        )
+      `,
+          { count: 'exact' }
+      )
+      .order('created_at', { ascending: false })
+      .range(from, to);
 
   const { data, error, count } = await query;
   if (error) throw error;
@@ -117,7 +131,7 @@ export async function listMemorized(): Promise<
     return {
       id: s.id,
       memorizedAt: r.memorized_at as string,
-      reviewAfter: r.review_after as string, // interval comes back as string
+      reviewAfter: r.review_after as string,
       card: toCard(s),
     };
   });
