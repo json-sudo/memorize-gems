@@ -1,14 +1,13 @@
 import { useMemo, useEffect, useState } from 'react';
-import { DATASET } from '../data/dataset';
 import { MemorizeMode, type Card } from '../types/cards';
 import Flashcard from '../components/Flashcard';
 import { useFlashcards } from '../hooks/useFlashcards';
-import { fetchScripturesPage, fetchDefaultGems, fetchFavoritesDue } from '../services/db';
+import { fetchDefaultGems, fetchFavoritesDueCards, fetchPracticeSet } from '../services/db';
 
 type Props = {
   mode: MemorizeMode;
   onBack: () => void;
-  source: 'all' | 'favoritesDue' | 'default';
+  source: 'default' | 'favoritesDue' | 'auto';
 };
 
 export default function MemorizeGemsPage({ mode, onBack, source }: Props) {
@@ -19,30 +18,35 @@ export default function MemorizeGemsPage({ mode, onBack, source }: Props) {
 
   useEffect(() => {
     let cancelled = false;
-    async function run() {
-      setLoading(true); setErr(null);
+    (async () => {
+      setLoading(true);
+      setErr(null);
       try {
-        const cards = source === 'all'
-          ? await fetchDefaultGems(10)     // adjust pagination later
-          : await fetchFavoritesDue(60);                         // 60-day blackout default
+        let cards: Card[] = [];
+        if (source === 'default') {
+          cards = await fetchDefaultGems(10);
+        } else if (source === 'favoritesDue') {
+          cards = await fetchFavoritesDueCards(60);
+        } else {
+          cards = await fetchPracticeSet(10, 60);
+        }
         if (!cancelled) setDataset(cards);
       } catch (e: unknown) {
         if (!cancelled) {
           if (e instanceof Error) setErr(e.message);
-          if (typeof e === 'string') setErr(`Failed to load cards: ${e}`);
+          else setErr('Failed to load cards');
         }
       } finally {
         if (!cancelled) setLoading(false);
       }
-    }
-    run();
+    })();
     return () => { cancelled = true; };
   }, [source]);
 
+  const total = useMemo(() => dataset.length, [dataset.length]);
+
   const { index, card, prompt, reveal, next, prev, onReveal } =
     useFlashcards(dataset, mode);
-
-  const total = useMemo(() => DATASET.length, []);
 
   if (loading) {
     return (
@@ -70,7 +74,7 @@ export default function MemorizeGemsPage({ mode, onBack, source }: Props) {
     );
   }
 
-  if (!loading && total === 0) {
+  if (total === 0) {
     return (
       <main className="container">
         <header className="row between">

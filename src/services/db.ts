@@ -1,138 +1,105 @@
 import { supabase } from '../lib/supabase';
-import type { Card } from '../types/cards';
+import type { Scripture, Card } from '../types/cards';
+import { buildScriptureRef } from '../types/cards';
+import type { FavoriteScriptures } from '../types/cards';
 
-type ScriptureRow = {
-  scripture: {
-    book: string;
-    chapter: number;
-    verse_from: number;
-    verse_to: number | null;
-  };
-  verse_content: string;
-};
-
-type ScriptureRowWithId = ScriptureRow & { scripture_id: string };
-
-const rowToCard = (row: ScriptureRow): Card => {
+function toCard(s: Scripture): Card {
   return {
-    scripture: row.scripture ?? `${row.book} ${row.chapter}:${row.verse_from}${row.verse_to ? '-' + row.verse_to : ''}`,
-    verseContent: row.verse_content,
+    scripture: buildScriptureRef(s),
+    verseContent: s.verse_content,
   };
 }
-
-const toCard = (r: ScriptureRow): Card => ({
-  scripture:
-      r.scripture ??
-      `${r.scripture?.book} ${r.scripture?.chapter}:${r.scripture?.verse_from}${
-          r.scripture?.verse_to ? '-' + r.scripture.verse_to : ''
-      }`,
-  verseContent: r.scripture?.verse_content ?? '',
-});
 
 export async function fetchDefaultGems(n = 10): Promise<Card[]> {
-  const { data, error } = await supabase.rpc('get_default_gems', { n });
+  const { data, error } = await supabase
+      .rpc('get_default_gems', { n })
+      .returns<Scripture[]>();
   if (error) throw error;
-  return (data ?? []).map(rowToCard);
+  return (data ?? []).map(toCard);
 }
 
-export async function listFavorites() {
+export async function fetchFavoritesDueCards(blackoutDays = 60): Promise<Card[]> {
+  const { data: ids, error } = await supabase
+      .rpc('get_favorites_due', { blackout_days: blackoutDays })
+      .returns<{ scripture_id: string }[]>();
+  if (error) throw error;
+
+  const scriptureIds = (ids ?? []).map((r: FavoriteScriptures) => r.scripture_id);
+  if (!scriptureIds.length) return [];
+
+  const { data, error: e2 } = await supabase
+      .from('scriptures')
+      .select('id, book, chapter, verse_from, verse_to, verse_content')
+      .in('id', scriptureIds)
+      .returns<Scripture[]>();
+  if (e2) throw e2;
+
+  const byId = new Map((data ?? []).map(s => [s.id, s]));
+  return scriptureIds.map((id: string) => byId.get(id)).filter(Boolean).map(toCard);
+}
+
+export async function fetchPracticeSet(n = 10, blackoutDays = 60): Promise<Card[]> {
+  const { data: session } = await supabase.auth.getSession();
+  if (session.session) {
+    const { data, error } = await supabase
+        .rpc('get_practice_set', { n, blackout_days: blackoutDays })
+        .returns<Scripture[]>();
+    if (error) throw error;
+    return (data ?? []).map(toCard);
+  }
+  return fetchDefaultGems(n);
+}
+
+export async function listFavorites(): Promise<
+    { id: string; createdAt: string; card: Card }[]
+> {
   const { data, error } = await supabase
       .from('favorite_gems')
       .select(
-          'scripture_id, created_at, scripture:scripture_id (id, book, chapter, verse_from, verse_to, verse_content, scripture)'
+          'scripture_id, created_at, scripture:scripture_id (id, book, chapter, verse_from, verse_to, verse_content)'
       )
       .order('created_at', { ascending: false });
-
   if (error) throw error;
 
-  return (data ?? []).map((r: FavoriteQueryResult) => ({
-    id: r.scripture!.id,
-    createdAt: r.created_at as string,
-    ...toCard(r),
-  }));
+  return (data ?? []).map((r: any) => {
+    const s = r.scripture as Scripture;
+    return {
+      id: s.id,
+      createdAt: r.created_at as string,
+      card: toCard(s),
+    };
+  });
 }
 
-export async function fetchMemorizeSet(n = 10, blackoutDays = 60): Promise<Card[]> {
-  const { data: session } = await supabase.auth.getSession();
-
-  if (session.session) {
-    const { data, error } = await supabase.rpc('get_practice_set', {
-      n, blackout_days: blackoutDays
-    });
-    if (error) throw error;
-    return (data ?? []).map(rowToCard);
-  } else {
-    return fetchDefaultGems(n);
-  }
-}
-
-export async function listMemorized() {
+export async function listMemorized(): Promise<
+    { id: string; memorizedAt: string; reviewAfter: string; card: Card }[]
+> {
   const { data, error } = await supabase
-    .from('memorized_gems')
-    .select('scripture_id, memorized_at, review_after, scriptures:*')
-    .order('memorized_at', { ascending: false });
+      .from('memorized_gems')
+      .select(
+          'scripture_id, memorized_at, review_after, scripture:scripture_id (id, book, chapter, verse_from, verse_to, verse_content)'
+      )
+      .order('memorized_at', { ascending: false });
   if (error) throw error;
-  return (data ?? []).map((r) => ({
-    id: r.scriptures.id,
-    memorizedAt: r.memorized_at,
-    reviewAfter: r.review_after,
-    ...rowToCard(r.scriptures)
-  }));
+
+  return (data ?? []).map((r: any) => {
+    const s = r.scripture as Scripture;
+    return {
+      id: s.id,
+      memorizedAt: r.memorized_at as string,
+      reviewAfter: r.review_after as string, // interval comes back as string
+      card: toCard(s),
+    };
+  });
 }
 
-export async function markAsMemorized(ids: string[], reviewDays = 60) {
-  const { error } = await supabase.rpc('mark_as_memorized', {
-    scripture_ids: ids, review_days: reviewDays
+export async function markAsMemorized(ids: string[], reviewDays = 60): Promise<void> {
+  if (!ids.length) return;
+  const {error} = await supabase.rpc('mark_as_memorized', {
+    scripture_ids: ids,
+    review_days: reviewDays,
   });
   if (error) throw error;
-}
-
-export async function unmemorize(ids: string[]) {
-  const { error } = await supabase.rpc('unmemorize', { scripture_ids: ids });
-  if (error) throw error;
-}
-
-export async function fetchScripturesPage(opts?: {limit?: number; offset?: number }) {
-  const limit = opts?.limit ?? 100;
-  const from = opts?.offset ?? 0;
-  const to = from + limit - 1;
-
-  const { data, error } = await supabase
-    .from('scriptures')
-    .select('*')
-    .order('book', { ascending: true })
-    .order('chapter', { ascending: true })
-    .order('verse_from', { ascending: true })
-    .range(from, to);
-
-  if (error) throw error;
-  return (data ?? []).map(rowToCard);
-}
-
-export async function fetchScripturesByIds(ids: string[]) {
-  if (!ids.length) return [];
-  const { data, error } = await supabase
-    .from('scriptures')
-    .select('*')
-    .in('id', ids);
-  if (error) throw error;
-  const map = new Map(data.map(d => [d.id, d]));
-  return ids.map(id => map.get(id)).filter(Boolean).map(rowToCard);
-}
-
-// Get favorites that are due for practice (honors blackout/review window)
-export async function fetchFavoritesDue(): Promise<Card[]> {
-  const idsRes = await supabase.rpc('get_favorites_due');
-  const { data: user } = await supabase.auth.getUser();
-  if (!user.user) throw new Error('Not authenticated');
-  const { data, error } = await supabase.rpc('favorites_due', {
-    uid: user.user.id,
-    blackout_days: blackoutDays
-  });
-  if (error) throw error;
-  const ids = (data ?? []).map((r: ScriptureRowWithId) => r.scripture_id as string);
-  if (!ids.length) return [];
-  return fetchScripturesByIds(ids);
 }
 
 export async function addFavorite(scriptureId: string) {
