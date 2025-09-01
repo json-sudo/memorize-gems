@@ -84,4 +84,4 @@ dd { margin: 0; }
   display: flex; align-items: center; justify-content: space-between;
 }
 
-.meta { color: var(--muted); margin-top: 10px; }
+.meta { color: var(--muted); }

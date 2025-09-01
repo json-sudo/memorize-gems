@@ -5,9 +5,20 @@ import type { FavoriteScriptures } from '../types/cards';
 
 function toCard(s: Scripture): Card {
   return {
+    id: s.id,
     scripture: buildScriptureRef(s),
     verseContent: s.verse_content,
   };
+}
+
+export async function isFavorite(scriptureId: string): Promise<boolean> {
+  const { data, error } = await supabase
+      .from('favorite_gems')
+      .select('scripture_id')
+      .eq('scripture_id', scriptureId)
+      .maybeSingle();
+  if (error && error.code !== 'PGRST116') throw error; // ignore no rows
+  return !!data;
 }
 
 export async function fetchDefaultGems(n = 10): Promise<Card[]> {
@@ -71,6 +82,25 @@ export async function listFavorites(): Promise<
   });
 }
 
+export async function listFavoritesPage(page: number, pageSize: number) {
+  const from = page * pageSize;
+  const to = from + pageSize - 1;
+  const query = supabase
+    .from('favorite+gems')
+    .select('scripture_id, created_at, scripture:scripture_id (id, book, chapter, verse_from, verse_to, verse_content', { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range(from, to);
+
+  const { data, error, count } = await query;
+  if (error) throw error;
+  const rows = (data ?? []).map((r: any) => ({
+    id: r.scripture.id as string,
+    createdAt: r.created_at as string,
+    card: toCard(r.scripture),
+  }));
+  return { rows, total: count ?? 0 };
+}
+
 export async function listMemorized(): Promise<
     { id: string; memorizedAt: string; reviewAfter: string; card: Card }[]
 > {
@@ -91,6 +121,26 @@ export async function listMemorized(): Promise<
       card: toCard(s),
     };
   });
+}
+
+export async function listMemorizedPage(page: number, pageSize: number) {
+  const from = page * pageSize;
+  const to = from + pageSize - 1;
+  const query = supabase
+      .from('memorized_gems')
+      .select('scripture_id, memorized_at, review_after, scripture:scripture_id (id, book, chapter, verse_from, verse_to, verse_content)', { count: 'exact' })
+      .order('memorized_at', { ascending: false })
+      .range(from, to);
+
+  const { data, error, count } = await query;
+  if (error) throw error;
+  const rows = (data ?? []).map((r: any) => ({
+    id: r.scripture.id as string,
+    memorizedAt: r.memorized_at as string,
+    reviewAfter: r.review_after as string,
+    card: toCard(r.scripture),
+  }));
+  return { rows, total: count ?? 0 };
 }
 
 export async function markAsMemorized(ids: string[], reviewDays = 60): Promise<void> {
@@ -118,6 +168,14 @@ export async function removeFavorite(scriptureId: string) {
     .from('favorite_gems')
     .delete()
     .match({ user_id: user.user.id, scripture_id: scriptureId });
+  if (error) throw error;
+}
+
+export async function unmemorize(ids: string[]): Promise<void> {
+  if (!ids.length) return;
+  const { error } = await supabase.rpc('unmemorize', {
+    scripture_ids: ids,
+  });
   if (error) throw error;
 }
 

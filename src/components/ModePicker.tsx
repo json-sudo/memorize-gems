@@ -90,7 +90,7 @@ export default function ModePicker({ onPick, activeMode, variant = 'full', onClo
                         onClose?.();
                       }}
                       className={[
-                        'w-full inline-flex items-center justify-center gap-2 rounded-md font-medium py-2.5 transition-colors',
+                        'w-full inline-flex items-center justify-center gap-2 rounded-sm font-medium py-2.5 transition-colors',
                         active
                             ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
                             : 'bg-purple-900/90 hover:bg-emerald-500 text-white',

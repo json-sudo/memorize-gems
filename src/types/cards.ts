@@ -13,6 +13,7 @@ export type FavoriteScriptures = Scripture & {
 }
 
 export type Card = {
+  id?: string;
   scripture: string;
   verseContent: string;
 };

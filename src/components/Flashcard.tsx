@@ -1,4 +1,5 @@
 import type { Card } from '../types/cards';
+import FavoriteToggle from './FavoriteToggle';
 
 type Props = {
   shown: Partial<Card>;
@@ -85,8 +86,11 @@ export default function Flashcard({
           <button className='control-buttons' onClick={onNext} aria-label="Next card">Next ›</button>
         </div>
 
-        <div className="meta">
+        <div className="meta flex items-center justify-between mt-12">
           {index + 1} / {total}
+          <div className="ml-auto">
+            <FavoriteToggle scriptureId={card?.id} />
+          </div>
         </div>
       </div>
     </section>
