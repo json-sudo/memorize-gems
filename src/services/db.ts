@@ -24,7 +24,6 @@ export async function isFavorite(scriptureId: string): Promise<boolean> {
 export async function fetchDefaultGems(n = 10): Promise<Card[]> {
   const { data, error } = await supabase
       .rpc('get_default_gems', { n })
-      .returns<Scripture[]>();
   if (error) throw error;
   return (data ?? []).map(toCard);
 }
@@ -32,7 +31,6 @@ export async function fetchDefaultGems(n = 10): Promise<Card[]> {
 export async function fetchFavoritesDueCards(blackoutDays = 60): Promise<Card[]> {
   const { data: ids, error } = await supabase
       .rpc('get_favorites_due', { blackout_days: blackoutDays })
-      .returns<{ scripture_id: string }[]>();
   if (error) throw error;
 
   const scriptureIds = (ids ?? []).map((r: FavoriteScriptures) => r.scripture_id);
@@ -54,7 +52,6 @@ export async function fetchPracticeSet(n = 10, blackoutDays = 60): Promise<Card[
   if (session.session) {
     const { data, error } = await supabase
         .rpc('get_practice_set', { n, blackout_days: blackoutDays })
-        .returns<Scripture[]>();
     if (error) throw error;
     return (data ?? []).map(toCard);
   }

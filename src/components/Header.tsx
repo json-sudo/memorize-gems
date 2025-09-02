@@ -4,14 +4,20 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useSession } from '../hooks/useSession';
 import { supabase } from '../lib/supabase';
 
-function NavItem({ to, children, onClick }: { to: string; children: ReactNode; onClick?: () => void }) {
-    const base = 'block px-3 py-2 rounded-md text-sm';
+function NavItem({ to, children, onClick, end = false }: {
+    to: string;
+    children: ReactNode;
+    onClick?: () => void;
+    end?: boolean;
+}) {
+    const base = 'block px-3 py-2 text-sm whitespace-nowrap';
     return (
         <NavLink
             to={to}
             onClick={onClick}
+            end={end}
             className={({ isActive }) =>
-                `${base} ${isActive ? 'bg-slate-800 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}`
+                `${base} ${isActive ? 'bg-slate-800 text-white border-b-1 border-slate-500' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}`
             }
         >
             {children}
@@ -35,17 +41,17 @@ export default function Header() {
     // Public links (visible to everyone)
     const publicLinks = (
         <>
-            <NavItem to="/memorize" onClick={close}>Memorize</NavItem>
+            <NavItem to="/mode" onClick={close}>Change mode</NavItem>
         </>
     );
 
     // Protected links (only when authed)
     const authedLinks = (
         <>
-            <NavItem to="/favorites/practice" onClick={close}>Favorites (Due)</NavItem>
-            <NavItem to="/favorites" onClick={close}>Gems I want to memorize</NavItem>
+            <NavItem to="/favourites/practice" onClick={close}>Memorize</NavItem>
+            <NavItem to="/favourites" end onClick={close}>Favourites</NavItem>
             <NavItem to="/memorized" onClick={close}>Memorized Gems</NavItem>
-            <NavItem to="/favorites/add" onClick={close}>Add Favorites</NavItem>
+            <NavItem to="/favourites/add" onClick={close}>Add Favorites</NavItem>
         </>
     );
 
@@ -60,7 +66,7 @@ export default function Header() {
                 <nav className="hidden md:flex items-center gap-2">
                     {publicLinks}
                     {user && authedLinks}
-                    <div className="w-px h-5 bg-slate-800 mx-2" />
+                    <div className="w-px h-5 bg-slate-400 mx-2" />
                     {!user ? (
                         <Link
                             to="/reauth"

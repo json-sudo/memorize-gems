@@ -28,7 +28,7 @@ export default function App() {
                     <Route path="/account" element={<main className="container"><AuthPanel /></main>} />
                     <Route path="/mode" element={<ModePage />} />
                     <Route
-                        path="/favorites"
+                        path="/favourites"
                         element={
                             <ProtectedRoute>
                                 <main className="container"><FavoriteGemsPage /></main>
@@ -44,7 +44,7 @@ export default function App() {
                         }
                     />
                     <Route
-                        path="/favorites/add"
+                        path="/favourites/add"
                         element={
                             <ProtectedRoute>
                                 <main className="container"><AddFavouriteGemsPage /></main>
