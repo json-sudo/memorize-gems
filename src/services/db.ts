@@ -61,27 +61,6 @@ export async function fetchPracticeSet(n = 10, blackoutDays = 60): Promise<Card[
   return fetchDefaultGems(n);
 }
 
-export async function listFavorites(): Promise<
-    { id: string; createdAt: string; card: Card }[]
-> {
-  const { data, error } = await supabase
-      .from('favorite_gems')
-      .select(
-          'scripture_id, created_at, scripture:scripture_id (id, book, chapter, verse_from, verse_to, verse_content)'
-      )
-      .order('created_at', { ascending: false });
-  if (error) throw error;
-
-  return (data ?? []).map((r: any) => {
-    const s = r.scripture as Scripture;
-    return {
-      id: s.id,
-      createdAt: r.created_at as string,
-      card: toCard(s),
-    };
-  });
-}
-
 export async function listFavoritesPage(page: number, pageSize: number) {
   const from = page * pageSize;
   const to = from + pageSize - 1;
@@ -113,28 +92,6 @@ export async function listFavoritesPage(page: number, pageSize: number) {
     card: toCard(r.scripture),
   }));
   return { rows, total: count ?? 0 };
-}
-
-export async function listMemorized(): Promise<
-    { id: string; memorizedAt: string; reviewAfter: string; card: Card }[]
-> {
-  const { data, error } = await supabase
-      .from('memorized_gems')
-      .select(
-          'scripture_id, memorized_at, review_after, scripture:scripture_id (id, book, chapter, verse_from, verse_to, verse_content)'
-      )
-      .order('memorized_at', { ascending: false });
-  if (error) throw error;
-
-  return (data ?? []).map((r: any) => {
-    const s = r.scripture as Scripture;
-    return {
-      id: s.id,
-      memorizedAt: r.memorized_at as string,
-      reviewAfter: r.review_after as string,
-      card: toCard(s),
-    };
-  });
 }
 
 export async function listMemorizedPage(page: number, pageSize: number) {
@@ -193,11 +150,28 @@ export async function unmemorize(ids: string[]): Promise<void> {
   if (error) throw error;
 }
 
-export async function markMemorized(scriptureId: string, days = 60) {
-  const { data: user } = await supabase.auth.getUser();
-  if (!user.user) throw new Error('Not authenticated');
-  const { error } = await supabase.from('memorized_gems').insert({
-    user_id: user.user.id, scripture_id: scriptureId, review_after: `${days} days`
-  });
+export async function searchScripturesPage(
+    q: string,
+    page: number,
+    pageSize: number
+): Promise<{ rows: Scripture[]; total:number }> {
+  const from = page * pageSize;
+  const to = from + pageSize - 1;
+
+  let query = supabase
+    .from('scriptures')
+    .select('id, book, chapter, verse_from, verse_to, verse_content', { count: 'exact' })
+    .order('book', { ascending: true })
+    .order('chapter', { ascending: true })
+    .order('verse_from', { ascending: true })
+    .range(from, to);
+
+  if (q && q.trim()) {
+    const term = `%${q.trim()}%`;
+    query = query.or(`book.ilike.${term},verse_content.ilike.${term}`);
+  }
+
+  const { data, error, count } = await query;
   if (error) throw error;
+  return { rows: (data ?? []) as Scripture[], total: count ?? 0 };
 }
