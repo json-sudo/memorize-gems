@@ -13,18 +13,18 @@ const MODE_COPY: Record<MemorizeMode, { title: string; desc: string; cta: string
   [MemorizeMode.GuessScriptureFromVerseContent]: {
     title: 'Guess Scripture from Verse',
     desc: 'See the verse text; recall the scripture reference.',
-    cta: 'Start (Scripture from Verse)',
+    cta: 'Start',
   },
   [MemorizeMode.GuessVerseContentFromScripture]: {
     title: 'Guess Verse from Scripture',
 
     desc: 'See the scripture; recall the verse text.',
-    cta: 'Start (Verse from Scripture)',
+    cta: 'Start',
   },
   [MemorizeMode.GuessEither]: {
     title: 'Guess Either at Random',
     desc: 'Sometimes the scripture, sometimes the verse is hidden.',
-    cta: 'Start (Random)',
+    cta: 'Start',
   },
 };
 
@@ -56,21 +56,21 @@ export default function ModePicker({ onPick, activeMode, variant = 'full', onClo
               <article
                   key={mode}
                   className={[
-                      'rounded-md border border-slate-800/80 bg-gradient-to-b p-3 shadow-xl transition-all grid',
+                      'rounded-md border border-slate-800/80 bg-gradient-to-b p-3 shadow-xl transition-all grid gap-3',
                       'from-slate-900/60 to-slate-950/80',
                       active ? 'border-emerald-500/60 shadow-emerald-500/10' : 'border-slate-800/80 hover:shadow-2xl hover:border-slate-700',
                   ].join(' ')}
               >
                 <header className={isCompact ? 'px-3 pt-2' : 'p-5'}>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-base md:text-lg font-semibold text-slate-100">{info.title}</h3>
+                    <h3 className="text-base md:text-md font-semibold text-slate-100">{info.title}</h3>
                     {active && (
                         <span className="rounded-full bg-emerald-500/20 text-emerald-300 text-xs px-2 py-0.5">
                           Current
                         </span>
                     )}
                   </div>
-                  <p className={`text-slate-400 ${isCompact ? 'text-xs mt-1' : 'text-sm mt-1'}`}>
+                  <p className={`text-slate-400 ${isCompact ? 'text-(13px) mt-1' : 'text-sm mt-1'}`}>
                     {info.desc}
                   </p>
                 </header>
@@ -90,11 +90,12 @@ export default function ModePicker({ onPick, activeMode, variant = 'full', onClo
                         onClose?.();
                       }}
                       className={[
-                        'w-full inline-flex items-center justify-center gap-2 rounded-sm font-medium py-2.5 transition-colors',
+                        'w-full inline-flex items-center justify-center gap-2 rounded-sm font-medium py-2 transition-colors',
                         active
-                            ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                            ? 'bg-emerald-600 text-white cursor-not-allowed opacity-40'
                             : 'bg-purple-900/90 hover:bg-emerald-500 text-white',
                       ].join(' ')}
+                      disabled={active}
                   >
                     {info.cta}
                   </button>

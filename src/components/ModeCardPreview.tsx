@@ -29,7 +29,7 @@ export default function ModeCardPreview({ scripture, verseContent, hidden }: Pro
             <div>
                 {/* Verse content */}
                 <dd
-                className={`text-slate-300 h-[100px] ${
+                className={`text-slate-300 h-[100px] text-sm ${
                     hidden === 'verseContent'
                     ? 'blur-[3px] select-none'
                     : 'overflow-hidden text-ellipsis'

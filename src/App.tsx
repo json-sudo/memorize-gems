@@ -1,10 +1,11 @@
-import { BrowserRouter, Routes, Route, Link, Outlet, useNavigate, useSearchParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Outlet, useNavigate, useSearchParams } from 'react-router-dom';
 import AddFavouriteGemsPage from './pages/AddFavouriteGemsPage';
 import MemorizeGemsPage from './pages/MemorizeGemsPage';
 import FavoriteGemsPage from './pages/FavoriteGemsPage';
 import MemorizedGemsPage from './pages/MemorizedGemsPage';
 import ModePage from './pages/ModePage';
 import AuthPanel from './components/AuthPanel';
+import Header from './components/Header';
 import Reauth from './components/Reauth';
 import ProtectedRoute from './components/ProtectedRoute';
 import { MemorizeMode } from './types/cards';
@@ -59,17 +60,7 @@ export default function App() {
 function RootLayout() {
   return (
     <div className="min-h-screen">
-      <header className="container py-4 flex items-center justify-between">
-        <Link to="/" className="text-lg font-semibold">Memorize Gems</Link>
-        <nav className="flex gap-4 text-sm items-center">
-            <Link to="/favorites/add" className="bg--300 hover:text-white">Add favorites</Link>
-            <Link to="/favorites" className="text-slate-300 hover:text-white">Gems I want to memorize</Link>
-            <Link to="/memorized" className="text-slate-300 hover:text-white">Memorized</Link>
-            <Link to="/favourites/practice" className="text-slate-300 hover:text-white">Favorites (Due)</Link>
-            <Link to="/mode" className="text-slate-300 hover:text-white">Change mode</Link>
-        </nav>
-      </header>
-
+      <Header />
       <Outlet />
     </div>
   );

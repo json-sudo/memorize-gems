@@ -9,12 +9,12 @@ export default function ModePage() {
 
     return (
         <main className="container py-4">
-            <h1 className="text-2xl font-semibold mb-2">Choose practice mode</h1>
+            <h1 className="text-xl font-semibold mb-2">Choose practice mode</h1>
             <p className="text-slate-400 mb-6">Pick how you want to practice. You can change this any time.</p>
             <ModePicker
                 activeMode={current}
                 onPick={(mode) => navigate(`/?mode=${encodeURIComponent(mode)}`)}
-                variant="full"
+                variant="compact"
             />
         </main>
     );

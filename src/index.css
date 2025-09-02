@@ -67,6 +67,12 @@ p { color: var(--muted); }
   padding: 24px;
   width: 90%;
 }
+@media (max-width: 768px) {
+  .card-body dl {
+    display: flex;
+    flex-direction: column;
+  }
+}
 dl { display: grid; grid-template-columns: 140px 1fr; row-gap: 10px; column-gap: 16px; margin: 0; }
 dt { color: var(--muted); }
 dd { margin: 0; }
@@ -75,7 +81,7 @@ dd { margin: 0; }
 .controls {
   display: flex; gap: 12px; margin-top: 48px; margin-bottom: 24px;
 }
- button {
+ button:not(:disabled) {
   cursor: pointer;
 }
 .controls button:hover { border-color: var(--accent); }
