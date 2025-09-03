@@ -70,12 +70,12 @@ export default function ModePicker({ onPick, activeMode, variant = 'full', onClo
                         </span>
                     )}
                   </div>
-                  <p className={`text-slate-400 ${isCompact ? 'text-(13px) mt-1' : 'text-sm mt-1'}`}>
+                  <p className={`text-slate-400 ${isCompact ? 'text-(13px) mt-4' : 'text-sm mt-1'}`}>
                     {info.desc}
                   </p>
                 </header>
 
-                <div className={isCompact ? 'px-3' : 'px-5'}>
+                <div className={isCompact ? 'px-3 mt-4' : 'px-5'}>
                   <ModeCardPreview
                       scripture={p.scripture}
                       verseContent={p.verseContent}
@@ -83,7 +83,7 @@ export default function ModePicker({ onPick, activeMode, variant = 'full', onClo
                   />
                 </div>
 
-                <div className={isCompact ? 'p-3 py-4' : 'p-4 py-8'}>
+                <div className={isCompact ? 'p-3 py-4 mt-4' : 'p-4 py-8'}>
                   <button
                       onClick={() => {
                         onPick(mode);
